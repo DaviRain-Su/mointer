@@ -97,6 +97,15 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn test_pair_by_chain_and_pair_address_bome_token() {
+        let chain_id = "solana";
+        let pair_address = vec!["DSUvc5qf5LJHHV5e2tD184ixotSnCnwj7i4jJa4Xsrmt"];
+        let result = get_pairs_by_chain_and_pair_address(chain_id, pair_address).await;
+        assert!(result.is_ok());
+        println!("{:#?}", result);
+    }
+
+    #[tokio::test]
     async fn test_get_token_pairs_by_token_address() {
         let pair_address = vec![
             "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",

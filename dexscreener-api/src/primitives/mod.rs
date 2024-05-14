@@ -39,13 +39,13 @@ pub struct Pair {
     #[serde(rename = "priceNative")]
     price_native: String,
     #[serde(rename = "priceUsd")]
-    price_usd: String,
+    price_usd: Option<String>,
     txns: Txns,
     volume: Volume,
     #[serde(rename = "priceChange")]
     price_change: PriceChange,
-    liquidity: Liquidity,
-    fdv: usize,
+    liquidity: Option<Liquidity>,
+    fdv: Option<usize>,
     #[serde(rename = "pairCreatedAt")]
     pair_createed_at: Option<usize>,
 }

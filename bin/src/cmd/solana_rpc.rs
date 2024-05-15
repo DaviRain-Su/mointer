@@ -16,7 +16,7 @@
 //! 14. Invariant Swap - HyaB3W9q6XdA5xwpU4XnSZV94htfmbmqJXZcEbRaJutt
 //! 15. Mercurial Stable swap - MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky
 //! 16. Raydium Liquidity Pool v4 - 675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8
-//!
+//! 17. Memo Program v2 - MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr
 //!
 //!
 //! token address:
@@ -85,7 +85,7 @@ impl SolanaRpc {
                     }
                 }
 
-                //println!("filter_vote_program: {:#?}", filter_vote_program);
+                println!("filter_vote_program: {:#?}", filter_vote_program);
                 println!("filter_vote_program length: {}", filter_vote_program.len());
             }
         }

@@ -1,5 +1,6 @@
 use clap::Parser;
 
+pub mod base64;
 pub mod dexscreener;
 pub mod error;
 pub mod server;
@@ -29,6 +30,8 @@ pub enum SubCommand {
     Dexscreener(Dexscreener),
     #[command(subcommand, name = "solana-rpc")]
     SolanaRpc(solana_rpc::SolanaRpc),
+    #[command(subcommand, name = "base64")]
+    Base64(base64::Base64),
 }
 
 impl SubCommand {
@@ -37,6 +40,7 @@ impl SubCommand {
             SubCommand::Server(server) => server.run().await,
             SubCommand::Dexscreener(dexscreener) => dexscreener.run().await,
             SubCommand::SolanaRpc(solana_rpc) => solana_rpc.run().await,
+            SubCommand::Base64(base64) => base64.run(),
         }
     }
 }

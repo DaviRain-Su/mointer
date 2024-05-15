@@ -37,10 +37,8 @@ pub async fn get_token_price(
         .header("x-chain", x_chain.unwrap_or(XChain::default()).to_string());
 
     let response = request_build.send().await?.text().await?;
-    println!("response: {}", response);
 
     let price_response: PriceResponse = serde_json::from_str(&response)?;
-    println!("price_response: {:#?}", price_response);
 
     Ok(price_response)
 }
@@ -93,7 +91,6 @@ pub async fn get_token_list(
         sort_by.unwrap_or(SortBy::default()),
         sort_type.unwrap_or(SortType::default())
     );
-    println!("url: {}", url);
 
     let request_build = reqwest::Client::new()
         .get(&url)
@@ -101,10 +98,8 @@ pub async fn get_token_list(
         .header("x-chain", x_chain.unwrap_or(XChain::default()).to_string());
 
     let response = request_build.send().await?.text().await?;
-    println!("response: {}", response);
 
     let response: TokenListResponse = serde_json::from_str(&response)?;
-    // println!("response: {:#?}", response);
 
     Ok(response)
 }
@@ -135,7 +130,6 @@ pub async fn get_multiple_price(
             BASE_URL, list_address
         )
     };
-    println!("url: {}", url);
 
     let request_build = reqwest::Client::new()
         .get(&url)
@@ -143,8 +137,6 @@ pub async fn get_multiple_price(
         .header("x-chain", x_chain.unwrap_or(XChain::default()).to_string());
 
     let response = request_build.send().await?.text().await?;
-
-    // println!("response: {}", response);
 
     let response: MultiplePriceResponse = serde_json::from_str(&response)?;
 
@@ -158,7 +150,6 @@ mod tests {
     #[test]
     fn test_x_chain_default_value() {
         let x_chian = XChain::default();
-        println!("x_chain: {}", x_chian);
         assert_eq!(x_chian, XChain::Solana);
     }
 
@@ -167,7 +158,6 @@ mod tests {
         let api_key = "67ee84080cc74239b63b716fe1d76ad7";
         let address = "ukHH6c7mMyiWCf1b9pnWe25TSpkDDt3H5pQZgZ74J82";
         let result = get_token_price(Some(true), address, api_key, None).await;
-        println!("result: {:?}", result);
         assert!(result.is_ok());
     }
 
@@ -182,15 +172,8 @@ mod tests {
             api_key,
             None,
         )
-        .await?;
-        println!("result: {:?}", result);
-        println!(
-            "token length: {}, total = {}",
-            result.tokens_len(),
-            result.data.total
-        );
-        println!("tokens name: {:?}", result.tokens_name());
-        println!("tokens symbol: {:?}", result.tokens_symbol());
+        .await;
+        assert!(result.is_ok());
         Ok(())
     }
 
@@ -202,6 +185,6 @@ mod tests {
             "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
         ];
         let result = get_multiple_price(None, None, list_address, api_key, None).await;
-        println!("result: {:#?}", result);
+        assert!(result.is_ok());
     }
 }

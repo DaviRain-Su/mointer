@@ -9,14 +9,12 @@ pub struct PriceResponse {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PriceData {
     #[serde(rename = "value")]
     price: f64,
-    #[serde(rename = "updateUnixTime")]
     update_unix_time: u64,
-    #[serde(rename = "updateHumanTime")]
     update_human_time: String,
-    #[serde(rename = "priceChange24h")]
     price_change_24h: Option<f64>,
     liquidity: Option<f64>,
 }
@@ -54,31 +52,27 @@ impl TokenListResponse {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TokenListData {
-    #[serde(rename = "updateUnixTime")]
     pub update_unix_time: u64,
-    #[serde(rename = "updateTime")]
     pub update_time: String,
     pub tokens: Vec<Token>,
     pub total: u64,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Token {
     pub address: String,
     pub decimals: u64,
-    #[serde(rename = "lastTradeUnixTime")]
     pub last_trade_unix_time: u64,
     pub liquidity: f64,
-    #[serde(rename = "logoURI")]
     pub logo_uri: Option<String>,
     pub mc: Option<f64>,
     pub name: String,
     pub symbol: String,
-    #[serde(rename = "v24hChangePercent")]
     pub v24h_change_percent: Option<f64>,
-    #[serde(rename = "v24hUSD")]
-    v24h_usd: f64,
+    pub v24h_usd: Option<f64>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

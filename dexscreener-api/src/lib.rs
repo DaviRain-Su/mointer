@@ -3,7 +3,7 @@
 use tracing::info;
 pub mod primitives;
 
-use primitives::{PairsResponse, SearchResponse, TokensResponse};
+use primitives::{ChainId, PairsResponse, SearchResponse, TokensResponse};
 
 const DEXSCREENER_API_URL: &str = "https://api.dexscreener.com/latest/dex";
 
@@ -11,7 +11,7 @@ const DEXSCREENER_API_URL: &str = "https://api.dexscreener.com/latest/dex";
 /// chain_id: &str, ethereum | bsc | polygon| etc
 /// pair_address: Vec<&str>, One or multiple, comma-separated pair addresses (up to 30 addresses)
 pub async fn get_pairs_by_chain_and_pair_address(
-    chain_id: &str,
+    chain_id: ChainId,
     pair_address: Vec<&str>,
 ) -> anyhow::Result<PairsResponse> {
     if pair_address.len() > 30 || pair_address.len() == 0 {
@@ -86,23 +86,21 @@ mod tests {
 
     #[tokio::test]
     async fn test_pari_by_chain_and_pair_address() {
-        let chain_id = "bsc";
+        let chain_id = ChainId::BinanceSmartChain;
         let pair_address = vec![
             "0x7213a321F1855CF1779f42c0CD85d3D95291D34C",
             "0x16b9a82891338f9ba80e2d6970fdda79d1eb0dae",
         ];
         let result = get_pairs_by_chain_and_pair_address(chain_id, pair_address).await;
         assert!(result.is_ok());
-        println!("{:#?}", result);
     }
 
     #[tokio::test]
     async fn test_pair_by_chain_and_pair_address_bome_token() {
-        let chain_id = "solana";
+        let chain_id = ChainId::Solana;
         let pair_address = vec!["DSUvc5qf5LJHHV5e2tD184ixotSnCnwj7i4jJa4Xsrmt"];
         let result = get_pairs_by_chain_and_pair_address(chain_id, pair_address).await;
         assert!(result.is_ok());
-        println!("{:#?}", result);
     }
 
     #[tokio::test]
@@ -113,7 +111,6 @@ mod tests {
         ];
         let result = get_tokens_by_token_address(pair_address).await;
         assert!(result.is_ok());
-        println!("{:#?}", result);
     }
 
     #[tokio::test]
@@ -121,6 +118,5 @@ mod tests {
         let query = "WBNB/USDC";
         let result = search_pairs_by_query(query).await;
         assert!(result.is_ok());
-        println!("{:?}", result);
     }
 }

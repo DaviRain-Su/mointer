@@ -3,6 +3,7 @@ use clap::Parser;
 pub mod dexscreener;
 pub mod error;
 pub mod server;
+pub mod solana_rpc;
 
 use dexscreener::Dexscreener;
 use server::Server;
@@ -26,6 +27,8 @@ pub enum SubCommand {
     Server(Server),
     #[command(subcommand, name = "dexscreener", about = "dexscreener commands")]
     Dexscreener(Dexscreener),
+    #[command(subcommand, name = "solana-rpc")]
+    SolanaRpc(solana_rpc::SolanaRpc),
 }
 
 impl SubCommand {
@@ -33,6 +36,7 @@ impl SubCommand {
         match self {
             SubCommand::Server(server) => server.run().await,
             SubCommand::Dexscreener(dexscreener) => dexscreener.run().await,
+            SubCommand::SolanaRpc(solana_rpc) => solana_rpc.run().await,
         }
     }
 }

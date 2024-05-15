@@ -8,6 +8,8 @@ anyhow = "1.0.83"
 axum = { version = "0.7.5", features = ["tokio"] }
 clap = { version = "4.5.4", features = ["derive"] }
 dexscreener-api = { version = "0.1.0", path = "../dexscreener-api" }
+solana-client = "1.18.13"
+solana-transaction-status = "1.18.13"
 thiserror = "1.0.60"
 tokio = { version = "1.37.0", features = ["full"] }
 tracing = "0.1.40"

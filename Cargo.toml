@@ -1,3 +1,3 @@
 [workspace]
-members = [ "bin", "birdeye", "dexscreener-api","hellius-webhook"]
+members = [ "bin", "birdeye", "dexscreener-api","hellius-webhook", "pump-fun-api"]
 resolver = "2"

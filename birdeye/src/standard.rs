@@ -5,7 +5,7 @@
 //!   - Token List : /defi/tokenlist
 //!   - Price : /defi/price
 
-use crate::primitives::response::{PriceResponse, TokenListResponse};
+use crate::primitives::response::{MultiplePriceResponse, PriceResponse, TokenListResponse};
 use crate::XChain;
 
 const BASE_URL: &str = "https://public-api.birdeye.so";
@@ -109,6 +109,48 @@ pub async fn get_token_list(
     Ok(response)
 }
 
+pub async fn get_multiple_price(
+    _check_liquidity: Option<f64>,
+    include_liquidity: Option<bool>,
+    list_address: Vec<&str>,
+    api_key: &str,
+    x_chain: Option<XChain>,
+) -> anyhow::Result<MultiplePriceResponse> {
+    let list_address = list_address.join("%2C");
+    let url = if let Some(include_liquidity) = include_liquidity {
+        if include_liquidity {
+            format!(
+                "{}/defi/multi_price?include_liquidity=true&list_address={}",
+                BASE_URL, list_address
+            )
+        } else {
+            format!(
+                "{}/defi/multi_price?list_address={}",
+                BASE_URL, list_address
+            )
+        }
+    } else {
+        format!(
+            "{}/defi/multi_price?list_address={}",
+            BASE_URL, list_address
+        )
+    };
+    println!("url: {}", url);
+
+    let request_build = reqwest::Client::new()
+        .get(&url)
+        .header("X-API-KEY", api_key)
+        .header("x-chain", x_chain.unwrap_or(XChain::default()).to_string());
+
+    let response = request_build.send().await?.text().await?;
+
+    // println!("response: {}", response);
+
+    let response: MultiplePriceResponse = serde_json::from_str(&response)?;
+
+    Ok(response)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -124,7 +166,7 @@ mod tests {
     async fn test_get_price() {
         let api_key = "67ee84080cc74239b63b716fe1d76ad7";
         let address = "ukHH6c7mMyiWCf1b9pnWe25TSpkDDt3H5pQZgZ74J82";
-        let result = get_token_price(None, address, api_key, None).await;
+        let result = get_token_price(Some(true), address, api_key, None).await;
         println!("result: {:?}", result);
         assert!(result.is_ok());
     }
@@ -150,5 +192,16 @@ mod tests {
         println!("tokens name: {:?}", result.tokens_name());
         println!("tokens symbol: {:?}", result.tokens_symbol());
         Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_get_multiple_price() {
+        let api_key = "67ee84080cc74239b63b716fe1d76ad7";
+        let list_address = vec![
+            "So11111111111111111111111111111111111111112",
+            "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
+        ];
+        let result = get_multiple_price(None, None, list_address, api_key, None).await;
+        println!("result: {:#?}", result);
     }
 }

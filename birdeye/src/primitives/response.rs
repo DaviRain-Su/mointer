@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -14,6 +16,8 @@ pub struct PriceData {
     update_unix_time: u64,
     #[serde(rename = "updateHumanTime")]
     update_human_time: String,
+    #[serde(rename = "priceChange24h")]
+    price_change_24h: Option<f64>,
     liquidity: Option<f64>,
 }
 
@@ -68,11 +72,17 @@ pub struct Token {
     pub liquidity: f64,
     #[serde(rename = "logoURI")]
     pub logo_uri: Option<String>,
-    pub mc: f64,
+    pub mc: Option<f64>,
     pub name: String,
     pub symbol: String,
     #[serde(rename = "v24hChangePercent")]
     pub v24h_change_percent: Option<f64>,
     #[serde(rename = "v24hUSD")]
     v24h_usd: f64,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct MultiplePriceResponse {
+    pub data: HashMap<String, PriceData>,
+    pub success: bool,
 }

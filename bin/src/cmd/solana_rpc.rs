@@ -27,13 +27,18 @@
 use clap::Parser;
 use solana_client::rpc_client::RpcClient;
 use solana_client::rpc_config::RpcBlockConfig;
+use solana_sdk::signature::Signature;
+use solana_transaction_status::UiTransactionEncoding;
 use solana_transaction_status::{EncodedTransaction, UiMessage};
+use std::str::FromStr;
 use tracing::info;
 
 #[derive(Parser, Debug)]
 pub enum SolanaRpc {
     #[command(name = "get-block", about = "Get block info")]
     GetBlock { solt: u64 },
+    #[command(name = "get-transaction", about = "Get transaction info")]
+    GetTransaction { signature: String },
 }
 
 impl SolanaRpc {
@@ -87,6 +92,13 @@ impl SolanaRpc {
 
                 println!("filter_vote_program: {:#?}", filter_vote_program);
                 println!("filter_vote_program length: {}", filter_vote_program.len());
+            }
+            SolanaRpc::GetTransaction { signature } => {
+                let result = client.get_transaction(
+                    &Signature::from_str(signature)?,
+                    UiTransactionEncoding::Json,
+                )?;
+                println!("result: {:#?}", result);
             }
         }
         Ok(())

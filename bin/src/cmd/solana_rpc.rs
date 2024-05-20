@@ -27,6 +27,8 @@
 use clap::Parser;
 use solana_client::rpc_client::RpcClient;
 use solana_client::rpc_config::RpcBlockConfig;
+use solana_client::rpc_config::RpcTransactionConfig;
+use solana_sdk::commitment_config::CommitmentConfig;
 use solana_sdk::signature::Signature;
 use solana_transaction_status::UiTransactionEncoding;
 use solana_transaction_status::{EncodedTransaction, UiMessage};
@@ -79,8 +81,17 @@ impl SolanaRpc {
                                 for instruction in message.instructions.iter() {
                                     if message.account_keys[instruction.program_id_index as usize]
                                         != "Vote111111111111111111111111111111111111111"
+                                    // vovte program
                                     {
                                         filter_vote_program.push(tx1);
+                                    } else if message.account_keys
+                                        [instruction.program_id_index as usize]
+                                        == "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
+                                    {
+                                        let data = bs58::decode(&instruction.data).into_vec()?;
+                                        let decode_data =
+                                            raydium_amm_types::AmmInstruction::unpack(&data)?;
+                                        println!("decode_data: {:?}", decode_data);
                                     }
                                 }
                             }
@@ -90,14 +101,35 @@ impl SolanaRpc {
                     }
                 }
 
-                println!("filter_vote_program: {:#?}", filter_vote_program);
+                println!("filter_vote_program: {:?}", filter_vote_program);
                 println!("filter_vote_program length: {}", filter_vote_program.len());
             }
             SolanaRpc::GetTransaction { signature } => {
-                let result = client.get_transaction(
-                    &Signature::from_str(signature)?,
-                    UiTransactionEncoding::Json,
-                )?;
+                let config = RpcTransactionConfig {
+                    encoding: Some(UiTransactionEncoding::Json),
+                    commitment: Some(CommitmentConfig::finalized()),
+                    max_supported_transaction_version: Some(0),
+                };
+                let result =
+                    client.get_transaction_with_config(&Signature::from_str(signature)?, config)?;
+                match &result.transaction.transaction {
+                    EncodedTransaction::Json(tx) => match &tx.message {
+                        UiMessage::Raw(message) => {
+                            for instruction in message.instructions.iter() {
+                                if message.account_keys[instruction.program_id_index as usize]
+                                    == "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
+                                {
+                                    let data = bs58::decode(&instruction.data).into_vec()?;
+                                    let decode_data =
+                                        raydium_amm_types::AmmInstruction::unpack(&data)?;
+                                    println!("decode_data: {:?}", decode_data);
+                                }
+                            }
+                        }
+                        _ => unimplemented!(),
+                    },
+                    _ => unimplemented!(),
+                }
                 println!("result: {:#?}", result);
             }
         }

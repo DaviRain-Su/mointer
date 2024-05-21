@@ -402,7 +402,9 @@ impl From<solana_transaction_status::UiCompiledInstruction> for CompiledInstruct
         CompiledInstruction {
             program_id_index: instruction.program_id_index,
             accounts: instruction.accounts,
-            data: bs58::decode(&instruction.data).into_vec().unwrap(),
+            data: bs58::decode(&instruction.data)
+                .into_vec()
+                .expect("base58 encoded data Never failed"),
             stack_height: instruction.stack_height,
         }
     }

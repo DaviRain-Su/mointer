@@ -24,12 +24,15 @@
 //! 1. Sol token address - So11111111111111111111111111111111111111112
 //! 2. USDT token address - Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB
 //!
+use bincode::deserialize;
 use clap::Parser;
+use serde::Deserialize;
 use solana_client::rpc_client::RpcClient;
 use solana_client::rpc_config::RpcBlockConfig;
 use solana_client::rpc_config::RpcTransactionConfig;
 use solana_sdk::commitment_config::CommitmentConfig;
 use solana_sdk::signature::Signature;
+use solana_sdk::system_instruction::SystemInstruction;
 use solana_transaction_status::UiTransactionEncoding;
 use solana_transaction_status::{EncodedTransaction, UiMessage};
 use std::str::FromStr;
@@ -123,6 +126,15 @@ impl SolanaRpc {
                                     let decode_data =
                                         raydium_amm_types::AmmInstruction::unpack(&data)?;
                                     println!("decode_data: {:?}", decode_data);
+                                } else if message.account_keys
+                                    [instruction.program_id_index as usize]
+                                    == "11111111111111111111111111111111"
+                                {
+                                    let data = bs58::decode(&instruction.data).into_vec()?;
+                                    // use bincode to deserialize
+                                    let system_instruction =
+                                        deserialize::<SystemInstruction>(&data)?;
+                                    println!("system_instruction: {:?}", system_instruction);
                                 }
                             }
                         }

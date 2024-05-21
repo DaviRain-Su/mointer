@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 use arrayref::array_mut_ref;
 use arrayref::mut_array_refs;
 use arrayref::{array_ref, array_refs};
@@ -9,7 +11,6 @@ use solana_program::pubkey::Pubkey;
 use std::mem::size_of;
 
 mod error;
-
 use error::AmmError;
 
 pub const TEN_THOUSAND: u64 = 10000;

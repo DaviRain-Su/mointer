@@ -17,7 +17,7 @@
 //! 15. Mercurial Stable swap - MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky
 //! 16. Raydium Liquidity Pool v4 - 675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8
 //! 17. Memo Program v2 - MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr
-//!
+//! 18. Jupiter DCA Program : DCA265Vj8a9CEuX1eb1LWRnDT7uK6q1xMipnNyatn23M
 //!
 //! token address:
 //!
@@ -26,6 +26,7 @@
 //!
 use bincode::deserialize;
 use clap::Parser;
+use solana_client::rpc_client::GetConfirmedSignaturesForAddress2Config;
 use solana_client::rpc_client::RpcClient;
 use solana_client::rpc_config::RpcBlockConfig;
 use solana_client::rpc_config::RpcTransactionConfig;
@@ -36,6 +37,8 @@ use solana_sdk::system_instruction::SystemInstruction;
 use solana_transaction_status::UiTransactionEncoding;
 use solana_transaction_status::{EncodedTransaction, UiMessage};
 use std::str::FromStr;
+use std::thread::sleep;
+use std::time::Duration;
 use tracing::info;
 use tx_parse_types::DecodeConfirmedTransactionWithStatusMeta;
 use tx_parse_types::DecodeTransaction;
@@ -46,6 +49,11 @@ pub enum SolanaRpc {
     GetBlock { solt: u64 },
     #[command(name = "get-transaction", about = "Get transaction info")]
     GetTransaction { signature: String },
+    #[command(
+        name = "get-transaction-by-address",
+        about = "Get transaction info by address"
+    )]
+    GetTransactionByAddress { address: String },
 }
 
 impl SolanaRpc {
@@ -96,7 +104,7 @@ impl SolanaRpc {
                                         let data = bs58::decode(&instruction.data).into_vec()?;
                                         let decode_data =
                                             raydium_amm_types::AmmInstruction::unpack(&data)?;
-                                        println!("decode_data: {:?}", decode_data);
+                                        println!("{:?}", decode_data);
                                     }
                                 }
                             }
@@ -117,38 +125,45 @@ impl SolanaRpc {
                 };
                 let result =
                     client.get_transaction_with_config(&Signature::from_str(signature)?, config)?;
-                let result = DecodeConfirmedTransactionWithStatusMeta::from(result);
+                // let result = DecodeConfirmedTransactionWithStatusMeta::from(result);
                 match &result.transaction.transaction {
-                    DecodeTransaction::Json(tx) => match &tx.message {
-                        tx_parse_types::UiMessage::Raw(message) => {
+                    EncodedTransaction::Json(tx) => match &tx.message {
+                        UiMessage::Raw(message) => {
                             for instruction in message.instructions.iter() {
                                 if message.account_keys[instruction.program_id_index as usize]
                                     == "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
                                 {
-                                    let decode_data = raydium_amm_types::AmmInstruction::unpack(
-                                        &instruction.data,
-                                    )?;
-                                    println!("decode_data: {:?}", decode_data);
+                                    let data = bs58::decode(&instruction.data).into_vec()?;
+                                    let decode_data =
+                                        raydium_amm_types::AmmInstruction::unpack(&data)?;
+                                    println!("{:?}", decode_data);
                                 } else if message.account_keys
                                     [instruction.program_id_index as usize]
                                     == "11111111111111111111111111111111"
                                 {
+                                    let data = bs58::decode(&instruction.data).into_vec()?;
                                     // use bincode to deserialize
                                     let system_instruction =
-                                        deserialize::<SystemInstruction>(&instruction.data)?;
+                                        deserialize::<SystemInstruction>(&data)?;
                                     println!("system_instruction: {:?}", system_instruction);
                                 } else if message.account_keys
                                     [instruction.program_id_index as usize]
                                     == "ComputeBudget111111111111111111111111111111"
                                 {
+                                    let data = bs58::decode(&instruction.data).into_vec()?;
                                     let compute_budget_instruction =
-                                        borsh::from_slice::<ComputeBudgetInstruction>(
-                                            &instruction.data,
-                                        )?;
-                                    println!(
-                                        "compute_budget_instruction: {:?}",
-                                        compute_budget_instruction
-                                    );
+                                        borsh::from_slice::<ComputeBudgetInstruction>(&data)?;
+                                    println!("{:?}", compute_budget_instruction);
+                                } else if message.account_keys
+                                    [instruction.program_id_index as usize]
+                                    == "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4"
+                                {
+                                    for account_idx in instruction.accounts.iter() {
+                                        println!(
+                                            "account: {}",
+                                            message.account_keys[*account_idx as usize]
+                                        );
+                                    }
                                 }
                             }
                         }
@@ -156,7 +171,26 @@ impl SolanaRpc {
                     },
                     _ => unimplemented!(),
                 }
-                println!("result: {:#?}", result);
+                println!("{:?}", result);
+            }
+            SolanaRpc::GetTransactionByAddress { address } => {
+                let address = solana_sdk::pubkey::Pubkey::from_str(address)?;
+                let config = GetConfirmedSignaturesForAddress2Config {
+                    before: Some(Signature::from_str("5a5Xbz1kjs69gesYpJ9HkeDWGkVrj7o1qf8D9YHTYREvszuNAmsSsM6LJoi4wKiGMwJSTgHfvKQh7HgdThayM5FB").unwrap()),
+                    until: None,
+                    limit: Some(1000),
+                    commitment: Some(CommitmentConfig::confirmed()),
+                };
+                let result = client
+                    .get_signatures_for_address_with_config(&address, config)?
+                    .into_iter()
+                    .map(|value| Signature::from_str(&value.signature).unwrap())
+                    .collect::<Vec<_>>();
+                println!("Address {} have {} transacition", address, result.len());
+                for (idx, signature) in result.iter().enumerate() {
+                    sleep(Duration::from_secs(1));
+                    println!("process {}: {}", idx, signature);
+                }
             }
         }
         Ok(())

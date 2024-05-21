@@ -119,13 +119,13 @@ impl SolanaRpc {
             }
             SolanaRpc::GetTransaction { signature } => {
                 let config = RpcTransactionConfig {
-                    encoding: Some(UiTransactionEncoding::Json),
+                    encoding: Some(UiTransactionEncoding::JsonParsed),
                     commitment: Some(CommitmentConfig::finalized()),
                     max_supported_transaction_version: Some(0),
                 };
                 let result =
                     client.get_transaction_with_config(&Signature::from_str(signature)?, config)?;
-                // let result = DecodeConfirmedTransactionWithStatusMeta::from(result);
+
                 match &result.transaction.transaction {
                     EncodedTransaction::Json(tx) => match &tx.message {
                         UiMessage::Raw(message) => {
@@ -158,20 +158,16 @@ impl SolanaRpc {
                                     [instruction.program_id_index as usize]
                                     == "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4"
                                 {
-                                    for account_idx in instruction.accounts.iter() {
-                                        println!(
-                                            "account: {}",
-                                            message.account_keys[*account_idx as usize]
-                                        );
-                                    }
+                                    println!("{:#?}", instruction);
                                 }
                             }
                         }
-                        _ => unimplemented!(),
+                        UiMessage::Parsed(message) => {
+                            println!("{:#?}", message);
+                        }
                     },
                     _ => unimplemented!(),
                 }
-                println!("{:?}", result);
             }
             SolanaRpc::GetTransactionByAddress { address } => {
                 let address = solana_sdk::pubkey::Pubkey::from_str(address)?;

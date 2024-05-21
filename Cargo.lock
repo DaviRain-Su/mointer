@@ -2317,6 +2317,7 @@ dependencies = [
  "axum",
  "base64 0.22.1",
  "bincode",
+ "borsh 1.5.0",
  "bs58 0.5.1",
  "clap 4.5.4",
  "colored",
@@ -2331,6 +2332,7 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber",
+ "tx-parse-types",
 ]
 
 [[package]]
@@ -5094,6 +5096,18 @@ dependencies = [
  "url",
  "utf-8",
  "webpki-roots 0.24.0",
+]
+
+[[package]]
+name = "tx-parse-types"
+version = "0.1.0"
+dependencies = [
+ "bs58 0.5.1",
+ "serde",
+ "serde_json",
+ "solana-program",
+ "solana-sdk",
+ "solana-transaction-status",
 ]
 
 [[package]]

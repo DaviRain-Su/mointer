@@ -4,6 +4,6 @@ members = [
     "birdeye",
     "defi/raydium-amm-types",
     "dexscreener-api",
-    "pump-fun-api",
+    "pump-fun-api", "tx-parse-types",
 ]
 resolver = "2"

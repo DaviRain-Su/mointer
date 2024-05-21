@@ -26,17 +26,19 @@
 //!
 use bincode::deserialize;
 use clap::Parser;
-use serde::Deserialize;
 use solana_client::rpc_client::RpcClient;
 use solana_client::rpc_config::RpcBlockConfig;
 use solana_client::rpc_config::RpcTransactionConfig;
 use solana_sdk::commitment_config::CommitmentConfig;
+use solana_sdk::compute_budget::ComputeBudgetInstruction;
 use solana_sdk::signature::Signature;
 use solana_sdk::system_instruction::SystemInstruction;
 use solana_transaction_status::UiTransactionEncoding;
 use solana_transaction_status::{EncodedTransaction, UiMessage};
 use std::str::FromStr;
 use tracing::info;
+use tx_parse_types::DecodeConfirmedTransactionWithStatusMeta;
+use tx_parse_types::DecodeTransaction;
 
 #[derive(Parser, Debug)]
 pub enum SolanaRpc {
@@ -115,26 +117,38 @@ impl SolanaRpc {
                 };
                 let result =
                     client.get_transaction_with_config(&Signature::from_str(signature)?, config)?;
+                let result = DecodeConfirmedTransactionWithStatusMeta::from(result);
                 match &result.transaction.transaction {
-                    EncodedTransaction::Json(tx) => match &tx.message {
-                        UiMessage::Raw(message) => {
+                    DecodeTransaction::Json(tx) => match &tx.message {
+                        tx_parse_types::UiMessage::Raw(message) => {
                             for instruction in message.instructions.iter() {
                                 if message.account_keys[instruction.program_id_index as usize]
                                     == "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
                                 {
-                                    let data = bs58::decode(&instruction.data).into_vec()?;
-                                    let decode_data =
-                                        raydium_amm_types::AmmInstruction::unpack(&data)?;
+                                    let decode_data = raydium_amm_types::AmmInstruction::unpack(
+                                        &instruction.data,
+                                    )?;
                                     println!("decode_data: {:?}", decode_data);
                                 } else if message.account_keys
                                     [instruction.program_id_index as usize]
                                     == "11111111111111111111111111111111"
                                 {
-                                    let data = bs58::decode(&instruction.data).into_vec()?;
                                     // use bincode to deserialize
                                     let system_instruction =
-                                        deserialize::<SystemInstruction>(&data)?;
+                                        deserialize::<SystemInstruction>(&instruction.data)?;
                                     println!("system_instruction: {:?}", system_instruction);
+                                } else if message.account_keys
+                                    [instruction.program_id_index as usize]
+                                    == "ComputeBudget111111111111111111111111111111"
+                                {
+                                    let compute_budget_instruction =
+                                        borsh::from_slice::<ComputeBudgetInstruction>(
+                                            &instruction.data,
+                                        )?;
+                                    println!(
+                                        "compute_budget_instruction: {:?}",
+                                        compute_budget_instruction
+                                    );
                                 }
                             }
                         }

@@ -34,14 +34,14 @@ use solana_sdk::commitment_config::CommitmentConfig;
 use solana_sdk::compute_budget::ComputeBudgetInstruction;
 use solana_sdk::signature::Signature;
 use solana_sdk::system_instruction::SystemInstruction;
+use solana_transaction_status::UiInstruction;
+use solana_transaction_status::UiParsedInstruction;
 use solana_transaction_status::UiTransactionEncoding;
 use solana_transaction_status::{EncodedTransaction, UiMessage};
 use std::str::FromStr;
 use std::thread::sleep;
 use std::time::Duration;
 use tracing::info;
-use tx_parse_types::DecodeConfirmedTransactionWithStatusMeta;
-use tx_parse_types::DecodeTransaction;
 
 #[derive(Parser, Debug)]
 pub enum SolanaRpc {
@@ -64,16 +64,21 @@ impl SolanaRpc {
                 info!("solt: {}", solt);
                 // 配置请求参数，包含 maxSupportedTransactionVersion
                 let config = RpcBlockConfig {
+                    encoding: Some(UiTransactionEncoding::JsonParsed),
+                    transaction_details: Some(solana_transaction_status::TransactionDetails::Full),
+                    rewards: None,
+                    commitment: Some(CommitmentConfig::finalized()),
                     max_supported_transaction_version: Some(0),
-                    ..RpcBlockConfig::default()
                 };
                 let result = client.get_block_with_config(*solt, config)?;
                 let tx = result.transactions.unwrap_or_default();
                 println!("tx len all have {}", tx.len());
+                let tx_signature = result.signatures.unwrap_or_default();
+                println!("tx_signature len all have {}", tx_signature.len());
 
                 // filter success tx
                 let txs_success = tx
-                    .iter()
+                    .into_iter()
                     .filter(|tx| {
                         if let Some(meta) = &tx.meta {
                             meta.err.is_none()
@@ -97,24 +102,37 @@ impl SolanaRpc {
                                     // vovte program
                                     {
                                         filter_vote_program.push(tx1);
-                                    } else if message.account_keys
-                                        [instruction.program_id_index as usize]
-                                        == "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
-                                    {
-                                        let data = bs58::decode(&instruction.data).into_vec()?;
-                                        let decode_data =
-                                            raydium_amm_types::AmmInstruction::unpack(&data)?;
-                                        println!("{:?}", decode_data);
                                     }
                                 }
                             }
-                            _ => unimplemented!(),
+                            // judege fisrt instruction is not vote program
+                            UiMessage::Parsed(message) => match &message.instructions[0] {
+                                UiInstruction::Compiled(_compiled) => todo!(),
+                                UiInstruction::Parsed(parsed) => match parsed {
+                                    UiParsedInstruction::Parsed(value1) => {
+                                        if value1.program != "vote" {
+                                            filter_vote_program.push(tx1);
+                                        }
+                                    }
+                                    UiParsedInstruction::PartiallyDecoded(_value2) => {
+                                        filter_vote_program.push(tx1);
+                                    }
+                                },
+                            },
                         },
                         _ => unimplemented!(),
                     }
                 }
 
-                println!("filter_vote_program: {:?}", filter_vote_program);
+                // let mut all_success_tx = Vec::new();
+                //for tx1 in filter_vote_program.iter() {
+                //    match &tx1.transaction {
+                //        EncodedTransaction::Json(tx) => all_success_tx.push(&tx.signatures[0]),
+                //       _ => todo!(),
+                //  }
+                //}
+                //println!("all_success_tx length: {:?}", all_success_tx);
+                //println!("filter_vote_program: {:?}", filter_vote_program);
                 println!("filter_vote_program length: {}", filter_vote_program.len());
             }
             SolanaRpc::GetTransaction { signature } => {
@@ -162,12 +180,13 @@ impl SolanaRpc {
                                 }
                             }
                         }
-                        UiMessage::Parsed(message) => {
-                            println!("{:#?}", message);
+                        UiMessage::Parsed(_message) => {
+                            println!("parsed")
                         }
                     },
                     _ => unimplemented!(),
                 }
+                println!("{:#?}", result);
             }
             SolanaRpc::GetTransactionByAddress { address } => {
                 let address = solana_sdk::pubkey::Pubkey::from_str(address)?;

@@ -3,7 +3,6 @@ use clap::Parser;
 pub mod base64;
 pub mod bs58;
 pub mod dexscreener;
-pub mod error;
 pub mod server;
 pub mod solana_rpc;
 

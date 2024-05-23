@@ -39,8 +39,6 @@ use solana_transaction_status::UiParsedInstruction;
 use solana_transaction_status::UiTransactionEncoding;
 use solana_transaction_status::{EncodedTransaction, UiMessage};
 use std::str::FromStr;
-use std::thread::sleep;
-use std::time::Duration;
 use tracing::info;
 
 #[derive(Parser, Debug)]
@@ -190,22 +188,47 @@ impl SolanaRpc {
             }
             SolanaRpc::GetTransactionByAddress { address } => {
                 let address = solana_sdk::pubkey::Pubkey::from_str(address)?;
-                let config = GetConfirmedSignaturesForAddress2Config {
-                    before: Some(Signature::from_str("5a5Xbz1kjs69gesYpJ9HkeDWGkVrj7o1qf8D9YHTYREvszuNAmsSsM6LJoi4wKiGMwJSTgHfvKQh7HgdThayM5FB").unwrap()),
-                    until: None,
-                    limit: Some(1000),
-                    commitment: Some(CommitmentConfig::confirmed()),
-                };
-                let result = client
-                    .get_signatures_for_address_with_config(&address, config)?
-                    .into_iter()
-                    .map(|value| Signature::from_str(&value.signature).unwrap())
-                    .collect::<Vec<_>>();
-                println!("Address {} have {} transacition", address, result.len());
-                for (idx, signature) in result.iter().enumerate() {
-                    sleep(Duration::from_secs(1));
-                    println!("process {}: {}", idx, signature);
+                let mut all_txs = Vec::new();
+                let mut before = None;
+                loop {
+                    let config = GetConfirmedSignaturesForAddress2Config {
+                        before,
+                        until: None,
+                        limit: Some(1000),
+                        commitment: Some(CommitmentConfig::confirmed()),
+                    };
+                    let mut result = client
+                        .get_signatures_for_address_with_config(&address, config)?
+                        .into_iter()
+                        .collect::<Vec<_>>();
+                    let last_signature = result.last();
+                    println!("last_signature: {:?}", last_signature);
+                    before = Some(Signature::from_str(
+                        &result
+                            .last()
+                            .ok_or(anyhow::anyhow!("get signatures is empty"))?
+                            .signature
+                            .clone(),
+                    )?);
+                    if result.len() < 1000 {
+                        all_txs.append(&mut result);
+                        break;
+                    } else {
+                        all_txs.append(&mut result);
+                        continue;
+                    }
                 }
+                println!("Address {} have {} transacition", address, all_txs.len());
+
+                let all_txs = all_txs
+                    .into_iter()
+                    .filter(|tx| tx.err.is_none())
+                    .collect::<Vec<_>>();
+                println!(
+                    "Address {} have {} success transacition",
+                    address,
+                    all_txs.len()
+                );
             }
         }
         Ok(())

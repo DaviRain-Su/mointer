@@ -5733,6 +5733,9 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "reqwest 0.12.4",
+ "serde_json",
+ "tokio",
+ "vybe-api-types",
 ]
 
 [[package]]

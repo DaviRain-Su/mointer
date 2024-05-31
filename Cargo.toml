@@ -5,6 +5,8 @@ members = [
     "defi/raydium-amm-types",
     "dexscreener-api",
     "jupiter-interface-types",
-    "tx-parse-types", "vybe-api",
+    "tx-parse-types",
+    "vybe-api",
+    "vybe-api/types",
 ]
 resolver = "2"

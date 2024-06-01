@@ -1,9 +1,8 @@
-//! 该端点整合了 SPL 代币持有量，并提供美元和 SOL 的投资组合价值，从而有助于全面了解账户的代币余额。
-
 use crate::VybeClient;
 use vybe_api_types::account::token_balances::{TokenBalancesRequest, TokenBalancesResponse};
 
 impl VybeClient {
+    /// 该端点整合了 SPL 代币持有量，并提供美元和 SOL 的投资组合价值，从而有助于全面了解账户的代币余额。
     pub async fn token_balances(
         &self,
         address: TokenBalancesRequest,

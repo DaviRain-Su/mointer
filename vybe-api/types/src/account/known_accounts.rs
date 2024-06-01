@@ -160,17 +160,17 @@ pub struct KnownAccountsResponse {
 #[serde(rename_all = "camelCase")]
 pub struct KnownAccountsResponseInner {
     #[serde(skip_serializing_if = "Option::is_none")]
-    owner_address: Option<String>,
+    pub owner_address: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    name: Option<String>,
+    pub name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    logo_url: Option<String>,
+    pub logo_url: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    labels: Option<Vec<Lable>>,
+    pub labels: Option<Vec<Lable>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    entity: Option<String>,
+    pub entity: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    entity_id: Option<isize>,
+    pub entity_id: Option<isize>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    data_added: Option<String>,
+    pub data_added: Option<String>,
 }

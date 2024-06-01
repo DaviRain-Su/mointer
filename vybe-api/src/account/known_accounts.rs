@@ -1,8 +1,8 @@
-//! 检索带标签的 Solana 账户的分类列表，包括 CEX 钱包、项目金库、AMM 流动性池、做市商和影响者。
 use crate::VybeClient;
 use vybe_api_types::account::known_accounts::{KnownAccountsRequest, KnownAccountsResponse};
 
 impl VybeClient {
+    /// 检索带标签的 Solana 账户的分类列表，包括 CEX 钱包、项目金库、AMM 流动性池、做市商和影响者。
     pub async fn known_accounts(
         &self,
         request: Option<KnownAccountsRequest>,

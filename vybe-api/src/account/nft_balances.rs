@@ -1,8 +1,8 @@
-//! 获取所提供账户地址的 NFT 余额。该端点整合 NFT 持有量并提供美元和 SOL 的投资组合价值，从而促进全面了解账户的 NFT 资产。
 use crate::VybeClient;
 use vybe_api_types::account::nft_balances::{NftBalancesRequest, NftBalancesResponse};
 
 impl VybeClient {
+    /// 获取所提供账户地址的 NFT 余额。该端点整合 NFT 持有量并提供美元和 SOL 的投资组合价值，从而促进全面了解账户的 NFT 资产。
     pub async fn nft_balances(
         &self,
         address: NftBalancesRequest,

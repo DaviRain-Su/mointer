@@ -3,7 +3,7 @@ members = [
     "bin",
     "birdeye",
     "defi/raydium-amm-types",
-    "dexscreener-api",
+    "dexscreener-api", "helius-rs",
     "jupiter-interface-types",
     "tx-parse-types",
     "vybe-api",

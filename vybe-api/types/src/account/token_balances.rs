@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use serde::{Deserialize, Serialize};
 
 pub struct TokenBalancesRequest {
@@ -13,6 +15,20 @@ pub struct TokenBalancesResponse {
     pub staked_sol_usd: String,
     pub total_token_value_usd: String,
     pub data: Vec<TokenData>,
+}
+
+impl Display for TokenBalancesResponse {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(
+            f,
+            "🧍Owner Address: {}, 🪙Staked SOL: {}, 🪙Total Token Value: {}",
+            self.owner_address, self.staked_sol_usd, self.total_token_value_usd
+        )?;
+        for token in &self.data {
+            writeln!(f, "{}", token)?;
+        }
+        write!(f, "")
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -32,4 +48,14 @@ pub struct TokenData {
     pub value_usd: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub logo_url: Option<String>,
+}
+
+impl Display for TokenData {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "🌾{}-🌲{}-🪞{}",
+            self.symbol, self.amount, self.value_usd
+        )
+    }
 }

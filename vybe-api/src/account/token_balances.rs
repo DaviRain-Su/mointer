@@ -36,10 +36,10 @@ mod tests {
                 .unwrap();
         let resp = client
             .token_balances(TokenBalancesRequest {
-                address: "3RieTyY7uM1KducnoBgjPvc1kpna94DSrCCaxz5a1ns6".to_string(),
+                address: "AVAZvHLR2PcWpDf8BXY4rVxNHYRBytycHkcB5z5QNXYm".to_string(),
             })
             .await
             .unwrap();
-        println!("{:#?}", resp);
+        println!("{}", resp);
     }
 }

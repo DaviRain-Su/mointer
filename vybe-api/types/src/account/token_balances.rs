@@ -1,19 +1,18 @@
 use serde::{Deserialize, Serialize};
 
-pub struct NftBalancesRequest {
-    /// 与 Solana 帐户关联的公钥 (pubKey)。
+pub struct TokenBalancesRequest {
     pub address: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct NftBalancesResponse {
+pub struct TokenBalancesResponse {
     pub date: usize,
     pub owner_address: String,
     pub fetcher_reports: Vec<FetcherReport>,
-    pub total_sol: String,
-    pub total_usd: String,
-    pub data: Vec<NftData>,
+    pub staked_sol_usd: String,
+    pub total_token_value_usd: String,
+    pub data: Vec<TokenData>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -24,14 +23,13 @@ pub struct FetcherReport {
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct NftData {
+pub struct TokenData {
+    pub symbol: String,
     pub name: String,
-    pub collection_address: String,
-    pub total_items: usize,
-    pub value_sol: String,
-    pub price_sol: String,
-    pub value_usd: String,
+    pub mint_address: String,
+    pub amount: String,
     pub price_usd: String,
+    pub value_usd: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub logo_url: Option<String>,
 }

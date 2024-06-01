@@ -1,5 +1,4 @@
 use serde::{Deserialize, Deserializer, Serialize};
-use solana_sdk::pubkey::Pubkey;
 use std::fmt;
 use std::fmt::Display;
 

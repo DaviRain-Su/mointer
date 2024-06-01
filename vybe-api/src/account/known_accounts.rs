@@ -12,12 +12,12 @@ impl VybeClient {
             println!("{:?}", request.to_query());
             let url = format!(
                 "{}/account/known-accounts?{}",
-                crate::BASE_URL,
+                Self::BASE_URL,
                 request.to_query()
             );
             url
         } else {
-            format!("{}/account/known-accounts", crate::BASE_URL)
+            format!("{}/account/known-accounts", Self::BASE_URL)
         };
         let resp = client
             .get(url)

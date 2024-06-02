@@ -40,6 +40,6 @@ mod tests {
             })
             .await
             .unwrap();
-        println!("{}", resp);
+        println!("{:#?}", resp);
     }
 }

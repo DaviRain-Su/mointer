@@ -2,12 +2,10 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::collections::{HashMap, HashSet};
-use std::fs::write;
+use std::fs::{self, write};
 use std::time::Duration;
 use tokio;
 use tokio::time::sleep;
-use vybe_api::VybeClient;
-use vybe_api_types::tokens::token::SimpleToken;
 
 // 定义最大重试次数和重试间的等待时间
 const MAX_RETRIES: u32 = 3;
@@ -29,22 +27,19 @@ struct ResponseData {
     result: Option<ResultData>,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct Token {
+    symbol: String,
+    mint_address: String,
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let client = Client::new();
     let base_url = "https://mainnet.helius-rpc.com/?api-key=945100da-05f7-4e19-9c1c-ce0778de6ef7";
-    let vp_client = VybeClient::new("8U8BxtAQVbrGzxWxaVdAkSPXtq4CPCExEbaBFQxwX4uPeByd".to_string())
-        .map_err(|e| anyhow::anyhow!("Failed to create VybeClient: {}", e))?;
-    let resp = vp_client
-        .tokens(None)
-        .await
-        .map_err(|e| anyhow::anyhow!("feild call to fetch tokens: {}", e))?;
-
-    let tokens = resp
-        .data
-        .into_iter()
-        .map(SimpleToken::from)
-        .collect::<Vec<SimpleToken>>();
+    // 从 input.json 读取 token 数据
+    let file_data = fs::read_to_string("../holders/input.json")?;
+    let tokens: Vec<Token> = serde_json::from_str(&file_data)?;
 
     println!("Found {} tokens", tokens.len());
 

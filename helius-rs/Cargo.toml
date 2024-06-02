@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.86"
 futures = "0.3.30"
+glob = "0.3.1"
 reqwest = { version = "0.12.4", features = ["json"] }
 retry = "2.0.0"
 serde = { version = "1.0.203", features = ["derive"] }

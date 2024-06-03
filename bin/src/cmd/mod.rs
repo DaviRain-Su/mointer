@@ -3,6 +3,7 @@ use clap::Parser;
 pub mod base64;
 pub mod bs58;
 pub mod dexscreener;
+pub mod helius;
 pub mod server;
 pub mod solana_rpc;
 
@@ -34,6 +35,8 @@ pub enum SubCommand {
     Base64(base64::Base64),
     #[command(subcommand, name = "bs58")]
     Bs58(bs58::Bs58),
+    #[command(subcommand, name = "helius")]
+    Helius(helius::Command),
 }
 
 impl SubCommand {
@@ -44,6 +47,7 @@ impl SubCommand {
             SubCommand::SolanaRpc(solana_rpc) => solana_rpc.run().await,
             SubCommand::Base64(base64) => base64.run(),
             SubCommand::Bs58(bs58) => bs58.run(),
+            SubCommand::Helius(hs) => hs.run().await,
         }
     }
 }
